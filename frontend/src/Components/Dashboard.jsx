@@ -26,7 +26,15 @@ function Dashboard() {
           >
             Dashboard
           </Typography>
-          <Typography>Welcome to your dashboard! Here you can match your mood to open restaurants.</Typography>
+          <Typography
+            sx={{ 
+              fontWeight: 400, 
+              fontSize: '1.25rem', 
+              marginBottom: '1rem' 
+            }}
+          >
+            Welcome to your dashboard! Here you can match your mood to open restaurants.
+          </Typography>
         </Box>
       </Box>
     </>

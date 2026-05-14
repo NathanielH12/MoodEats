@@ -22,8 +22,10 @@ function LandingPage() {
       <Typography 
         sx={{ 
           fontWeight: 700, 
-          fontSize: '3rem', 
-          marginBottom: '1rem' 
+          fontSize: '5rem', 
+          marginBottom: '1rem',
+          color: 'rgb(241, 170, 78)',
+          letterSpacing: '0.1rem'
         }}
       >
         Welcome to MoodEats
@@ -31,20 +33,21 @@ function LandingPage() {
       <Typography 
         sx={{ 
           fontWeight: 500, 
-          fontSize: '1.25rem', 
+          fontSize: '1.75rem', 
           marginBottom: '2rem' 
         }}
       >
-        Discover recipes that match your mood!
+        Discover restaurants that match your mood!
       </Typography>
       <Button
         sx={{
-          backgroundColor: '#007bff',
+          backgroundColor: 'rgb(199, 121, 19)',
           color: 'white',
           border: 'none',
           padding: '0.75rem 1.5rem',
           fontSize: '1rem',
           cursor: 'pointer',
+          fontWeight: 600,
         }}
         onClick={handleClick}
       >
