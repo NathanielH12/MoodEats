@@ -10,8 +10,8 @@ function LandingPage() {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        }}
-      >
+      }}
+    >
       <Typography 
         sx={{ 
           fontWeight: 700, 
