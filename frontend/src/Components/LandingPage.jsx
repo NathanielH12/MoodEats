@@ -1,6 +1,13 @@
 import { Box, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/dashboard');
+  }
+
   return (
     <Box
       sx={{ 
@@ -39,6 +46,7 @@ function LandingPage() {
           fontSize: '1rem',
           cursor: 'pointer',
         }}
+        onClick={handleClick}
       >
         Get Started
       </Button>
