@@ -41,7 +41,6 @@ function DashboardNavBar() {
       </Box>
 
       <Box className={styles.dashboardMainContent}>
-        <span className={styles.mainTitle}>Flash Card Decks</span>
       </Box>
     </>
   );
