@@ -1,0 +1,34 @@
+{
+  "users": [
+    {
+      "userId": 1,
+      "nameFirst": "Nat",
+      "nameLast": "H",
+      "email": "test@test.com",
+      "password": "1234",
+      "numSuccessfulLogins": 0,
+      "numFailedPasswordsSinceLastLogin": 0,
+      "passwordHistory": []
+    },
+    {
+      "userId": 2,
+      "nameFirst": "Nathaniel",
+      "nameLast": "Hendra",
+      "email": "nathaniel.hendra03@gmail.com",
+      "password": "p",
+      "numSuccessfulLogins": 0,
+      "numFailedPasswordsSinceLastLogin": 0,
+      "passwordHistory": []
+    }
+  ],
+  "sessions": {
+    "4b9f3f9c-2636-4e2b-8902-7c08da0489d5": {
+      "nameFirst": "Nathaniel",
+      "userId": 2
+    },
+    "415afedb-c8ff-4099-a064-940ba2852978": {
+      "nameFirst": "Nathaniel",
+      "userId": 2
+    }
+  }
+}

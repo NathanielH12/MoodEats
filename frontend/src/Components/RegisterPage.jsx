@@ -2,92 +2,55 @@ import { Box, Button, TextField, Alert, Snackbar, Typography } from "@mui/materi
 import ErrorIcon from "@mui/icons-material/Error";
 import { useNavigate } from "react-router-dom";
 import React from "react";
-// import MoodEatsLogo from '../assets/MoodEatsLogo.png';
-// import { registerUser } from "../../api";
+import axios from 'axios';
 
-/**
- * RegisterPage component that displays the register form for a user to register.
- */
 export const RegisterPage = ({ setToken }) => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [name, setName] = React.useState("");
+  const [firstName, setFirstName] = React.useState("");
+  const [lastName, setLastName] = React.useState("");
   const [redOutline, setRedOutline] = React.useState(false);
   const [errorAlert, setErrorAlert] = React.useState("");
   const navigate = useNavigate();
 
-  /**
-   * Function called when the register info is to be sent to the backend.
-   */
-  const handleRegister = async (email, password, confirmPassword, name) => {
-
+  const handleRegister = async (email, password, confirmPassword, firstName, lastName) => {
     if (password !== confirmPassword) {
       setRedOutline(true);
       setErrorAlert("Passwords don't match");
-      return; 
+      return;
     }
 
     try {
-      const data = await registerUser(email, password, name);
+      await axios.post('http://localhost:5500/register', {
+        nameFirst: firstName,
+        nameLast: lastName,
+        email,
+        password,
+      });
 
-      if (data.error) {
-        setRedOutline(true);
-        setErrorAlert(data.error);
-      } else {
-        setRedOutline(false);
-        setErrorAlert("");
-        setToken(data.token);
-      }
-    } catch {
-      setErrorAlert("Something went wrong. Please try again");
+      // Backend returns { message } not { token }, so go to login
+      setRedOutline(false);
+      setErrorAlert("");
+      navigate("/login");
+
+    } catch (err) {
+      // Axios throws on 4xx/5xx — read the backend's error message
+      const serverError = err.response?.data?.error;
+      setRedOutline(true);
+      setErrorAlert(serverError || "Something went wrong. Please try again");
     }
-  }
-
-  /**
-   * Function called when the register button is clicked.
-   * registers the user or alerts an error.
-   */
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    handleRegister(email, password, confirmPassword, name);
   };
 
-  /**
-   * Function called when the email input box changes.
-   */
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-    setRedOutline(false);
-    setErrorAlert("");
-  }
-  
-  /**
-   * Function called when the name input box changes.
-   */
-  const handleNameChange = (event) => {
-    setName(event.target.value);
-    setRedOutline(false);
-    setErrorAlert("");
-  }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    handleRegister(email, password, confirmPassword, firstName, lastName);
+  };
 
-  /**
-   * Function called when the password input box changes.
-   */
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
+  const clearError = () => {
     setRedOutline(false);
     setErrorAlert("");
-  }
-
-  /**
-   * Function called when the confirm password input box changes.
-   */
-  const handleConfirmPasswordChange = (event) => {
-    setConfirmPassword(event.target.value);
-    setRedOutline(false);
-    setErrorAlert("");
-  }
+  };
 
   return (
     <>
@@ -101,14 +64,9 @@ export const RegisterPage = ({ setToken }) => {
           gap: '50px'
         }}
       >
-        {/* <img
-          src={MoodEatsLogo}
-          alt="MoodEats Logo"
-          style={{ width: '15em', borderRadius: '50%' }}
-        /> */}
         <Box
           sx={{
-            backgroundColor: "rgb(255, 255, 255)", // dark card, lighter than background
+            backgroundColor: "rgb(255, 255, 255)",
             borderRadius: "12px",
             padding: "40px",
             width: "100%",
@@ -149,22 +107,25 @@ export const RegisterPage = ({ setToken }) => {
               </Snackbar>
             )}
 
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "15px",
-                width: "100%",
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%" }}>
               <TextField
                 error={redOutline}
-                label="Name"
+                label="First Name"
                 variant="outlined"
                 type="text"
-                value={name}
-                onChange={e => handleNameChange(e)}
-                slotProps={{ htmlInput: { "data-testid": "register-name" } }}
+                value={firstName}
+                onChange={e => { setFirstName(e.target.value); clearError(); }}
+                slotProps={{ htmlInput: { "data-testid": "register-firstname" } }}
+                fullWidth
+              />
+              <TextField
+                error={redOutline}
+                label="Last Name"
+                variant="outlined"
+                type="text"
+                value={lastName}
+                onChange={e => { setLastName(e.target.value); clearError(); }}
+                slotProps={{ htmlInput: { "data-testid": "register-lastname" } }}
                 fullWidth
               />
               <TextField
@@ -172,7 +133,7 @@ export const RegisterPage = ({ setToken }) => {
                 label="Email"
                 variant="outlined"
                 value={email}
-                onChange={e => handleEmailChange(e)}
+                onChange={e => { setEmail(e.target.value); clearError(); }}
                 slotProps={{ htmlInput: { "data-testid": "register-email" } }}
                 fullWidth
               />
@@ -182,17 +143,17 @@ export const RegisterPage = ({ setToken }) => {
                 variant="outlined"
                 type="password"
                 value={password}
-                onChange={e => handlePasswordChange(e)}
+                onChange={e => { setPassword(e.target.value); clearError(); }}
                 slotProps={{ htmlInput: { "data-testid": "register-password" } }}
                 fullWidth
               />
               <TextField
                 error={redOutline}
-                label="Confirm password"
+                label="Confirm Password"
                 variant="outlined"
                 type="password"
                 value={confirmPassword}
-                onChange={e => handleConfirmPasswordChange(e)}
+                onChange={e => { setConfirmPassword(e.target.value); clearError(); }}
                 slotProps={{ htmlInput: { "data-testid": "register-confirm" } }}
                 fullWidth
               />
@@ -202,7 +163,7 @@ export const RegisterPage = ({ setToken }) => {
                 data-testid="register-submit"
                 fullWidth
                 sx={{ backgroundColor: 'rgb(199, 121, 19)' }}
-                >
+              >
                 Register
               </Button>
               <Button
@@ -220,4 +181,4 @@ export const RegisterPage = ({ setToken }) => {
       </Box>
     </>
   );
-}
+};

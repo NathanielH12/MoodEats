@@ -3,7 +3,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import MoodEatsLogo from '../assets/MoodEatsLogo.png';
-// import { loginUser } from "../../api";
+import axios from 'axios';
 
 /**
  * LoginPage components which displays the login form for a user to login.
@@ -21,8 +21,12 @@ export const LoginPage = ({ setToken }) => {
    */
   const handleLogin = async (email, password) => {
     try {
-      // const data = await loginUser(email, password);
-      console.log
+      const res = await axios.post('http://localhost:5500/login', {
+        email,
+        password,
+      });
+
+      const data = res.data;
 
       if (data.error) {
         setRedOutline(true);
@@ -32,9 +36,9 @@ export const LoginPage = ({ setToken }) => {
         setErrorAlert("");
         setToken(data.token);
       }
-    } catch {
-      setErrorAlert("Something went wrong. Please try again.")
-    };
+    } catch (err) {
+      setErrorAlert("Something went wrong. Please try again.");
+    }
   };
 
   /**
