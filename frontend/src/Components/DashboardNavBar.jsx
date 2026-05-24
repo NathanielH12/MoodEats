@@ -9,6 +9,10 @@ import MoodIcon from '@mui/icons-material/Mood';
 function DashboardNavBar() {
   const navigate = useNavigate();
 
+  function onProfileClick() {
+    navigate('/profile');
+  }
+
   return (
     <>
       <Box className={styles.dashboardNavBar}>
@@ -26,7 +30,7 @@ function DashboardNavBar() {
         </Box>
 
         <Box className={styles.navItemsContainer}>
-          <Box className={styles.navItem}>
+          <Box className={styles.navItem} onClick={onProfileClick}>
             <PersonIcon sx={{ color: 'white', fontSize: 50 }} />
           </Box>
 
