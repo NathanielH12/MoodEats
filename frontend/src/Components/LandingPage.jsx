@@ -5,7 +5,11 @@ function LandingPage() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/dashboard');
+    if (localStorage.getItem('token') === null) {
+      navigate('/login');
+    } else {
+      navigate('/dashboard');
+    }
   }
 
   return (
