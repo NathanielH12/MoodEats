@@ -4,9 +4,6 @@ interface User {
     nameLast: string,
     email: string,
     password: string,
-    numSuccessfulLogins: number,
-    numFailedPasswordsSinceLastLogin: number
-    passwordHistory: string[];
 }
 
 interface Session {

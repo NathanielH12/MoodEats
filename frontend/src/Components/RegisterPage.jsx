@@ -22,20 +22,26 @@ export const RegisterPage = ({ setToken }) => {
     }
 
     try {
-      await axios.post('http://localhost:5500/register', {
+      const res = await axios.post('http://localhost:5500/register', {
         nameFirst: firstName,
         nameLast: lastName,
         email,
         password,
       });
 
-      // Backend returns { message } not { token }, so go to login
-      setRedOutline(false);
-      setErrorAlert("");
-      navigate("/login");
+      const data = res.data;
+
+      if (data.error) {
+        setRedOutline(true);
+        setErrorAlert(data.error);
+      } else {
+        setRedOutline(false);
+        setErrorAlert("");
+        setToken(data.token);       // saves to localStorage via handleSetToken
+        navigate("/dashboard");     // then redirect
+      }
 
     } catch (err) {
-      // Axios throws on 4xx/5xx — read the backend's error message
       const serverError = err.response?.data?.error;
       setRedOutline(true);
       setErrorAlert(serverError || "Something went wrong. Please try again");

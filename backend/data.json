@@ -2,10 +2,10 @@
   "users": [
     {
       "userId": 1,
-      "nameFirst": "Nat",
-      "nameLast": "H",
-      "email": "test@test.com",
-      "password": "1234",
+      "nameFirst": "Nathaniel",
+      "nameLast": "Hendra",
+      "email": "nathaniel.hendra03@gmail.com",
+      "password": "p",
       "numSuccessfulLogins": 0,
       "numFailedPasswordsSinceLastLogin": 0,
       "passwordHistory": []
@@ -14,17 +14,39 @@
       "userId": 2,
       "nameFirst": "Nathaniel",
       "nameLast": "Hendra",
-      "email": "nathaniel.hendra03@gmail.com",
-      "password": "p",
-      "numSuccessfulLogins": 0,
-      "numFailedPasswordsSinceLastLogin": 0,
-      "passwordHistory": []
+      "email": "nathaniel.hendra003@gmail.com",
+      "password": "p"
+    },
+    {
+      "userId": 3,
+      "nameFirst": "Nathaniel",
+      "nameLast": "Hendra",
+      "email": "nathaniel.hendra0673@gmail.com",
+      "password": "p"
+    },
+    {
+      "userId": 4,
+      "nameFirst": "Nathaniel",
+      "nameLast": "Hendra",
+      "email": "nathaniel.hendra086893@gmail.com",
+      "password": "p"
+    },
+    {
+      "userId": 5,
+      "nameFirst": "Nathaniel",
+      "nameLast": "Hendra",
+      "email": "nathaniel.hendr78a03@gmail.com",
+      "password": "p"
     }
   ],
   "sessions": {
-    "4b9f3f9c-2636-4e2b-8902-7c08da0489d5": {
+    "54cd73a7-00fa-4df4-a389-0ff339e78630": {
       "nameFirst": "Nathaniel",
-      "userId": 2
+      "userId": 4
+    },
+    "b88a3b76-d9ac-4f81-b7de-70bb22f95e44": {
+      "nameFirst": "Nathaniel",
+      "userId": 5
     }
   }
 }

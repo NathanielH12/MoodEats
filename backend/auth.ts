@@ -44,30 +44,32 @@ export const authed = (fn: Function) => async (req: Request, res: Response) => {
  * Registers a new user by creating a new userId and checking that it is not an existing user through email
  */
 router.post('/register', (req: Request, res: Response) => {
-    const { nameFirst, nameLast, email, password } = req.body;
+  const { nameFirst, nameLast, email, password } = req.body;
 
-    if (!nameFirst || !nameLast || !email || !password)
-        return res.status(400).json({ error: 'All fields are required in order to register!' });
+  if (!nameFirst || !nameLast || !email || !password)
+    return res.status(400).json({ error: 'All fields are required in order to register!' });
 
-    const data = getData();
-    const exists = data.users.find((u) => u.email === email);
-    if (exists) return res.status(400).json({ error: 'Email already registered!' });
+  const data = getData();
+  const exists = data.users.find((u) => u.email === email);
+  if (exists) return res.status(400).json({ error: 'Email already registered!' });
 
-    data.users.push({
-        userId: getNextUserId(data.users),
-        nameFirst,
-        nameLast,
-        email,
-        password,
-        numSuccessfulLogins: 0,
-        numFailedPasswordsSinceLastLogin: 0,
-        passwordHistory: []
-    });
+  const newUser = {
+    userId: getNextUserId(data.users),
+    nameFirst,
+    nameLast,
+    email,
+    password,
+  };
 
-    saveDataToFile(data);
+  data.users.push(newUser);
 
-    return res.status(201).json({ message: 'Registered successfully' });
-})
+  const token = randomUUID();
+  data.sessions[token] = { nameFirst: newUser.nameFirst, userId: newUser.userId };
+
+  saveDataToFile(data);
+
+  return res.status(200).json({ token });
+});
 
 /**
  * Logins a user and creates a token for the session with nameFirst and userId.
