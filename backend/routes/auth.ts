@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
-import { getData, saveDataToFile } from './dataStore';
+import { getData, saveDataToFile } from '../dataStore';
 
 const router = Router();
 
