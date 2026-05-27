@@ -1,6 +1,21 @@
 import { Box, Typography } from '@mui/material';
 import DashboardNavBar from './DashboardNavBar';
 
+const fetchRestaurants = async (mood) => {
+  // Get user coords via browser geolocation
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const res = await axios.get('http://localhost:5500/restaurants', {
+      headers: { Authorization: token },
+      params: {
+        mood,
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      },
+    });
+    setRestaurants(res.data.restaurants);
+  });
+};
+
 function Dashboard() {
   return (
     <>
