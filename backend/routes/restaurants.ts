@@ -22,6 +22,14 @@ const moodMap: Record<string, string[]> = {
   lazy:        ['burgers', 'pizza', 'chinese'],
 };
 
+const priceLevelMap: Record<string, string> = {
+  PRICE_LEVEL_FREE:          'Free',
+  PRICE_LEVEL_INEXPENSIVE:   '$',
+  PRICE_LEVEL_MODERATE:      '$$',
+  PRICE_LEVEL_EXPENSIVE:     '$$$',
+  PRICE_LEVEL_VERY_EXPENSIVE:'$$$$',
+};
+
 router.get('/restaurants', authed(async (req: Request, res: Response) => {
 
   // 2. Validate inputs
@@ -82,7 +90,7 @@ router.get('/restaurants', authed(async (req: Request, res: Response) => {
       rating: place.rating,
       address: place.formattedAddress,
       openNow: place.currentOpeningHours?.openNow ?? null,
-      priceLevel: place.priceLevel ?? null,
+      priceLevel: priceLevelMap[place.priceLevel] ?? null,
       cuisine: searchTerm,
     }));
 

@@ -4,6 +4,7 @@ import React from 'react';
 import axios from 'axios';
 import StarIcon from '@mui/icons-material/Star';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 // outside the component so it doesn't get recreated on every render.
 // string sent to the backend as the mood query parameter
@@ -188,6 +189,10 @@ function Dashboard({ token }) {
                         <StarIcon sx={{ fontSize: '1rem', color: 'rgb(199, 121, 19)' }} />
                         <Typography sx={{ fontSize: '0.875rem', color: 'grey.400' }}>
                           {r.rating ?? 'No rating'}
+                        </Typography>
+                        
+                        <Typography sx={{ fontSize: '0.8rem', color: 'grey.400' }}>
+                          - {r.priceLevel ?? 'Price unknown'}
                         </Typography>
                       </Box>
 
