@@ -32,9 +32,8 @@ function App() {
         path="/register"
         element={token ? <Navigate to="/dashboard" replace /> : <RegisterPage setToken={handleSetToken} />}
       />
-      <Route
-        path="/dashboard"
-        element={token ? <DashboardPage setToken={handleSetToken} /> : <Navigate to="/" replace />}
+      <Route 
+        path="/dashboard" element={token ? <DashboardPage token={token} setToken={handleSetToken} /> : <Navigate to="/" replace />}
       />
       <Route
         path="/profile"
