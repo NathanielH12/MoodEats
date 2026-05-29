@@ -37,7 +37,7 @@ router.get('/restaurants', authed(async (req: Request, res: Response) => {
 
   // 3. Call Places API (New) — Nearby Search
   const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-  const searchTerm = cuisines[0]; // use top cuisine match
+  const searchTerm = cuisines[Math.floor(Math.random() * cuisines.length)]; // use top cuisine match
 
   /**
    * process.env.GOOGLE_API_KEY reads from your .env file
@@ -59,7 +59,7 @@ router.get('/restaurants', authed(async (req: Request, res: Response) => {
     'https://places.googleapis.com/v1/places:searchText',
     {
       textQuery: `${searchTerm} restaurants`,
-      maxResultCount: 10,
+      maxResultCount: 15,
       locationBias: {
         circle: {
           center: { latitude: parseFloat(lat), longitude: parseFloat(lng) },
