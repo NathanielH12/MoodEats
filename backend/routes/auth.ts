@@ -1,122 +1,126 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
-import { getData, saveDataToFile } from '../dataStore';
+import prisma from '../prisma/client';
 
 const router = Router();
 
 /**
- * Finds the next available unique id for a user using simple arithmetic with the list of users
- */
-function getNextUserId(users: { userId: number }[]): number {
-    if (users.length === 0) return 1;
-    // Math.max expects individual numbers (comma-separated) not an array, so map users into each number.
-    return Math.max(...users.map(u => u.userId)) + 1;
-}
-
-/**
- * A higher order function which is essentially a function which takes another function as input and returns
- * another function.
- * 
- * An auth middleware function which validates the existence of a token before running the given function.
- *  Steps
- *      - extracts token from header
- *      - checks data.sessions[token]
- *      - if valid runs function otherwise, return 401 and the function requested never runs.
+ * Higher order auth middleware — same logic as before, but instead of
+ * looking up the token in data.sessions (a JS object), we query the
+ * Session table in PostgreSQL via Prisma.
+ *
+ * prisma.session.findUnique finds exactly one row where token = the header value.
+ * include: { user: true } is a JOIN — it fetches the related User row at the
+ * same time so we get nameFirst and userId without a second query.
  */
 export const authed = (fn: Function) => async (req: Request, res: Response) => {
-    const header = req.headers['authorization'] ?? '';
-    const token = header.replace('Bearer ', '').trim();
+  const header = req.headers['authorization'] ?? '';
+  const token = header.replace('Bearer ', '').trim();
 
-    const data = getData();
-    const session = data.sessions[token];
+  // findUnique returns null if no matching row — replaces data.sessions[token]
+  const session = await prisma.session.findUnique({
+    where: { token },
+    include: { user: true }, // JOIN: also fetch the User this session belongs to
+  });
 
-    if (!session) return res.status(401).json({ error: 'Unauthorised!' });
+  if (!session) return res.status(401).json({ error: 'Unauthorised!' });
 
-    // Attach the session ({ nameFirst, userId }) onto req so downstream route handlers
-    // can access who is making the request via (req as any).user without re-querying the data store.
-    // 'as any' is to escape TypeScript since Express's Request type has no built-in .user field.
-    (req as any).user = session;
-    return fn(req, res);
-}
+  // session.user is the full User row thanks to include: { user: true }
+  (req as any).user = {
+    userId: session.user.id,
+    nameFirst: session.user.nameFirst,
+  };
+
+  return fn(req, res);
+};
 
 /**
- * Registers a new user by creating a new userId and checking that it is not an existing user through email
+ * Register — same logic, but:
+ * - prisma.user.findUnique replaces data.users.find()
+ * - prisma.user.create replaces data.users.push() + saveDataToFile()
+ * - prisma.session.create replaces data.sessions[token] = {...} + saveDataToFile()
+ * - No more getNextUserId() — PostgreSQL auto-increments the id via @default(autoincrement())
  */
-router.post('/register', (req: Request, res: Response) => {
+router.post('/register', async (req: Request, res: Response) => {
   const { nameFirst, nameLast, email, password } = req.body;
 
   if (!nameFirst || !nameLast || !email || !password)
     return res.status(400).json({ error: 'All fields are required in order to register!' });
 
-  const data = getData();
-  const exists = data.users.find((u) => u.email === email);
+  // replaces: data.users.find(u => u.email === email)
+  const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) return res.status(400).json({ error: 'Email already registered!' });
 
-  const newUser = {
-    userId: getNextUserId(data.users),
-    nameFirst,
-    nameLast,
-    email,
-    password,
-  };
+  // replaces: data.users.push(newUser) + saveDataToFile()
+  // Prisma inserts the row and returns the created object (including the auto-generated id)
+  const newUser = await prisma.user.create({
+    data: { nameFirst, nameLast, email, password },
+  });
 
-  data.users.push(newUser);
-
+  // replaces: data.sessions[token] = { nameFirst, userId } + saveDataToFile()
   const token = randomUUID();
-  data.sessions[token] = { nameFirst: newUser.nameFirst, userId: newUser.userId };
-
-  saveDataToFile(data);
+  await prisma.session.create({
+    data: {
+      token,
+      userId: newUser.id,    // newUser.id is the auto-incremented id PostgreSQL assigned
+      nameFirst: newUser.nameFirst,
+    },
+  });
 
   return res.status(200).json({ token });
 });
 
 /**
- * Logins a user and creates a token for the session with nameFirst and userId.
- * Returns the token (created using UUID (Universally Unique Identifier: a 128-bit number. Built in Node.js)).
+ * Login — same logic:
+ * - prisma.user.findUnique replaces data.users.find()
+ * - prisma.session.create replaces data.sessions[token] = {...} + saveDataToFile()
  */
-router.post('/login', (req: Request, res: Response) => {
-    const { email, password } = req.body;
+router.post('/login', async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 
-    const data = getData();
-    const user = data.users.find((u) => u.email === email && u.password === password);
+  // findUnique returns null if no row matches — replaces data.users.find()
+  const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials!' });
-    }
+  if (!user || user.password !== password)
+    return res.status(401).json({ error: 'Invalid credentials!' });
 
-    const token = randomUUID();
-    data.sessions[token] = { nameFirst: user.nameFirst, userId: user.userId };
-    saveDataToFile(data);
+  const token = randomUUID();
 
-    return res.status(200).json({ token });
+  // replaces: data.sessions[token] = {...} + saveDataToFile()
+  await prisma.session.create({
+    data: {
+      token,
+      userId: user.id,
+      nameFirst: user.nameFirst,
+    },
+  });
+
+  return res.status(200).json({ token });
 });
 
 /**
- * Returns the currently authenticated user's session data (nameFirst and userId).
- *  Use cases:
- *      - Verifies a stored token is still valid when the app loads (i.e. "am I still logged in?").
- *      - Retrieves the logged-in user's info for the frontend (e.g. displaying their name in the UI).
- *      - Acts as a quick sanity-check during development to confirm the auth flow is working.
- *      - Useful for displaying information for the user in their profile page.
- */         
+ * /me — identical logic, just reads from req.user which authed() now
+ * populates from the Prisma session query instead of the data file.
+ */
 router.get('/me', authed(async (req: Request, res: Response) => {
-    const user = (req as any).user;
-    res.json({ userId: user.userId, nameFirst: user.nameFirst });
+  const user = (req as any).user;
+  res.json({ userId: user.userId, nameFirst: user.nameFirst });
 }));
 
 /**
- * Logs out the user by deleting the token.
+ * Logout — replaces delete data.sessions[token] + saveDataToFile()
+ * with prisma.session.delete().
+ * .catch(() => {}) silently ignores if the token didn't exist
+ * (same behaviour as deleting a key that doesn't exist in a JS object).
  */
 router.post('/logout', authed(async (req: Request, res: Response) => {
-    const token = req.headers['authorization']!.replace('Bearer ', '').trim();
-    const data  = getData();
-    // delete key-value pair from data.sessions ('delete' is a built-in JavaScript operator)
-    delete data.sessions[token];
+  const token = req.headers['authorization']!.replace('Bearer ', '').trim();
 
-    saveDataToFile(data);
+  // replaces: delete data.sessions[token] + saveDataToFile()
+  await prisma.session.delete({ where: { token } }).catch(() => {});
 
-    return res.status(200).json({ message: 'Logged out' });
+  return res.status(200).json({ message: 'Logged out' });
 }));
 
 export default router;
