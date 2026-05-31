@@ -1,0 +1,27 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  nameFirst String
+  nameLast  String
+  email     String    @unique
+  password  String
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+}
+
+model Session {
+  token     String   @id
+  userId    Int
+  nameFirst String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
