@@ -98,6 +98,11 @@ function Dashboard({ token }) {
     fetchRestaurants(mood);   // kick off the API call
   };
 
+  const handleClick = (restaurant) => {
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' ' + restaurant.address)}`;
+    window.open(mapsUrl, '_blank');
+  }
+
   return (
     <>
       <Box sx={{ display: 'flex' }}>
@@ -172,6 +177,7 @@ function Dashboard({ token }) {
                 {restaurants.map((r) => (
                   <Card
                     key={r.id}
+                    onClick={() => handleClick(r)}
                     sx={{
                       width: 280,
                       backgroundColor: '#1e1e1e',
