@@ -1,3 +1,14 @@
+/*
+Whenever you add new tables/columns later, you'll need to:
+
+Update schema.prisma
+
+Manually run the SQL in Supabase's SQL Editor
+
+Run npx prisma generate
+*/
+
+
 generator client {
   provider        = "prisma-client-js"
   output          = "../generated/prisma"
