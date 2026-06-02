@@ -26,6 +26,7 @@ model User {
   email     String    @unique
   password  String
   sessions  Session[]
+  favourites Favourite[]
   createdAt DateTime  @default(now())
 }
 
@@ -35,4 +36,17 @@ model Session {
   nameFirst String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model Favourite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  placeId   String   // unique ID from Google Places API
+  name      String
+  address   String
+  rating    Float?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, placeId])  // prevent saving same place twice
 }
