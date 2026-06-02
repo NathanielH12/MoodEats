@@ -4,7 +4,8 @@ import LandingPage from './Components/LandingPage.jsx'
 import DashboardPage from './Components/DashboardPage.jsx'
 import { RegisterPage } from './Components/RegisterPage.jsx'
 import { LoginPage } from './Components/LoginPage.jsx'
-import Profile from './Components/Profile.jsx'   // ✅ default import
+import Profile from './Components/Profile.jsx'
+import FavouritesPage from './Components/FavouritesPage';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -38,6 +39,10 @@ function App() {
       <Route
         path="/profile"
         element={token ? <Profile setToken={handleSetToken} /> : <Navigate to="/" replace />}
+      />
+      <Route 
+        path="/favourites" 
+        element={token ? <FavouritesPage token={token} setToken={handleSetToken} /> : <Navigate to="/" replace />}
       />
     </Routes>
   )
