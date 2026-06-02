@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MoodEatsLogo from '../assets/MoodEatsLogo.png';
 import styles from './Dashboard.module.css';
 import PersonIcon from '@mui/icons-material/Person';
-import HistoryIcon from '@mui/icons-material/History';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import MoodIcon from '@mui/icons-material/Mood';
 
 function DashboardNavBar() {
@@ -11,6 +11,10 @@ function DashboardNavBar() {
 
   function onProfileClick() {
     navigate('/profile');
+  }
+
+  function onFavClick() {
+    navigate('/favourites');
   }
 
   return (
@@ -38,8 +42,8 @@ function DashboardNavBar() {
             <MoodIcon sx={{ color: 'white', fontSize: 50 }} />
           </Box>
 
-          <Box className={styles.navItem}>
-            <HistoryIcon sx={{ color: 'white', fontSize: 50 }} />
+          <Box className={styles.navItem} onClick={onFavClick}>
+            <FavoriteIcon sx={{ color: 'white', fontSize: 50 }} />
           </Box>
         </Box>
       </Box>
