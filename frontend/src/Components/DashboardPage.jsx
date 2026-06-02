@@ -21,9 +21,21 @@ function Dashboard({ token }) {
   // The components memory, whenever these changes React re-renders the UI
   const [selectedMood, setSelectedMood] = React.useState(null); // for when the user selects the mood
   const [restaurants, setRestaurants] = React.useState([]); // an array of restaurants returned from the backend
+  const [favourites, setFavourites] = React.useState([]); // stores placeIds of saved restaurants
   const [loading, setLoading] = React.useState(false); // whether a fetch is currently in progress (controls the spinner)
   const [error, setError] = React.useState(''); // any API/backend error message to display
   const [locationError, setLocationError] = React.useState(''); // specifically for when the user denies location access
+
+  React.useEffect(() => {
+    axios.get('http://localhost:5500/favourites', {
+      headers: { Authorization: token }
+    })
+      .then(res => {
+        // store just the placeIds so we can check isSaved easily
+        setFavourites(res.data.map((f) => f.placeId));
+      })
+      .catch(() => {}); // fail silently — favourites not critical to load
+  }, [token]);
 
   const fetchRestaurants = (mood) => {
     // clears any previous error messages so stale errors don't linger.
@@ -102,6 +114,29 @@ function Dashboard({ token }) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' ' + restaurant.address)}`;
     window.open(mapsUrl, '_blank');
   }
+
+  const toggleFavourite = async (e, r) => {
+    e.stopPropagation(); // prevent the card's onClick (Maps) from firing
+
+    const isSaved = favourites.includes(r.id);
+
+    if (isSaved) {
+      await axios.delete(`http://localhost:5500/favourites/${r.id}`, {
+        headers: { Authorization: token }
+      });
+      setFavourites(prev => prev.filter(id => id !== r.id));
+    } else {
+      await axios.post('http://localhost:5500/favourites', {
+        placeId: r.id,
+        name: r.name,
+        address: r.address,
+        rating: r.rating
+      }, {
+        headers: { Authorization: token }
+      });
+      setFavourites(prev => [...prev, r.id]);
+    }
+  };
 
   return (
     <>
@@ -218,6 +253,21 @@ function Dashboard({ token }) {
                           fontSize: '0.75rem',
                         }}
                       />
+
+                      {/* ❤️ Favourite button */}
+                      <Button
+                        onClick={(e) => toggleFavourite(e, r)}
+                        sx={{
+                          minWidth: 0,
+                          padding: '0.25rem',
+                          fontSize: '1.2rem',
+                          lineHeight: 1,
+                          color: favourites.includes(r.id) ? 'rgb(199, 121, 19)' : 'grey.600',
+                          '&:hover': { backgroundColor: 'transparent' },
+                        }}
+                      >
+                        {favourites.includes(r.id) ? '❤️' : '🤍'}
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
