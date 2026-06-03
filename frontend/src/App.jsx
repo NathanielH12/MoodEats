@@ -38,7 +38,7 @@ function App() {
       />
       <Route
         path="/profile"
-        element={token ? <Profile setToken={handleSetToken} /> : <Navigate to="/" replace />}
+        element={token ? <Profile token={token} setToken={handleSetToken} /> : <Navigate to="/" replace />}
       />
       <Route 
         path="/favourites" 
