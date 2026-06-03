@@ -5,6 +5,7 @@ import restaurantRouter from './routes/restaurants';
 import { loadDataFile } from './dataStore';
 import authRouter from './routes/auth';
 import favouritesRouter from './routes/favourites';
+import profileRouter from './routes/profile';
 
 loadDataFile();
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/', authRouter);
 app.use('/', restaurantRouter);
 app.use('/favourites', favouritesRouter);
+app.use('/', profileRouter);
 
 app.get("/", (req, res) => {
   res.send("Backend is running"); // For Debug purposes
