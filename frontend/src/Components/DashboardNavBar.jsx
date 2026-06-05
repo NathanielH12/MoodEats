@@ -13,6 +13,10 @@ function DashboardNavBar() {
     navigate('/profile');
   }
 
+  function onFaceClick() {
+    navigate('/dashboard');
+  }
+
   function onFavClick() {
     navigate('/favourites');
   }
@@ -38,7 +42,7 @@ function DashboardNavBar() {
             <PersonIcon sx={{ color: 'white', fontSize: 50 }} />
           </Box>
 
-          <Box className={styles.navItem}>
+          <Box className={styles.navItem} onClick={onFaceClick}>
             <MoodIcon sx={{ color: 'white', fontSize: 50 }} />
           </Box>
 
