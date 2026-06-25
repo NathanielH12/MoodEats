@@ -34,6 +34,7 @@ model Session {
   token     String   @id
   userId    Int
   nameFirst String
+  expiresAt DateTime   // When this session becomes invalid — checked on every request
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
