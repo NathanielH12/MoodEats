@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
+import bcrypt from 'bcrypt';
 import prisma from '../prisma/client';
+
+// Salt rounds refer to the number of iterations the bcrypt algorithm uses to hash 
+// the password. It determines how computationally expensive the hash is.
+const SALT_ROUNDS = 12;
 
 const router = Router();
 
@@ -45,17 +50,30 @@ export const authed = (fn: Function) => async (req: Request, res: Response) => {
 router.post('/register', async (req: Request, res: Response) => {
   const { nameFirst, nameLast, email, password } = req.body;
 
+  
   if (!nameFirst || !nameLast || !email || !password)
     return res.status(400).json({ error: 'All fields are required in order to register!' });
+  
+  const normalizedEmail = email.toLowerCase().trim();
 
   // replaces: data.users.find(u => u.email === email)
-  const exists = await prisma.user.findUnique({ where: { email } });
+  const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (exists) return res.status(400).json({ error: 'Email already registered!' });
+
+  /**
+   * bcrypt.hash(password, SALT_ROUNDS) does two things:
+   * 1. Generates a random "salt" (random bytes mixed into the hash)
+   * 2. Runs the bcrypt algorithm 2^SALT_ROUNDS times (intentionally slow)
+   *
+   * The result looks like: "$2b$12$LJ3m5eQxRZkVn..." (60 chars)
+   * It contains: algorithm version + cost + salt + hash — all in one string
+   */
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
   // replaces: data.users.push(newUser) + saveDataToFile()
   // Prisma inserts the row and returns the created object (including the auto-generated id)
   const newUser = await prisma.user.create({
-    data: { nameFirst, nameLast, email, password },
+    data: { nameFirst, nameLast, email: normalizedEmail, password: hashedPassword },
   });
 
   // replaces: data.sessions[token] = { nameFirst, userId } + saveDataToFile()
@@ -79,11 +97,25 @@ router.post('/register', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  // findUnique returns null if no row matches — replaces data.users.find()
-  const user = await prisma.user.findUnique({ where: { email } });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required!' });
+  }
 
-  if (!user || user.password !== password)
-    return res.status(401).json({ error: 'Invalid credentials!' });
+  const normalizedEmail = email.toLowerCase().trim();
+
+  // findUnique returns null if no row matches — replaces data.users.find()
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+  if (!user) return res.status(401).json({ error: 'Invalid credentials!' });
+
+  /**
+   * bcrypt.compare(plaintextInput, storedHash) does:
+   * 1. Extracts the salt from the stored hash string
+   * 2. Hashes the input using that same salt
+   * 3. Compares the result — returns true/false
+   */
+  const passwordValid = await bcrypt.compare(password, user.password);
+  if (!passwordValid) return res.status(401).json({ error: 'Invalid credentials!' });
 
   const token = randomUUID();
 
